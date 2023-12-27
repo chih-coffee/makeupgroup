@@ -1,0 +1,59 @@
+import requests
+import bs4
+import pandas as pd
+from snownlp import SnowNLP
+
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+session = requests.Session()
+
+def fetch_url(url):
+    return session.get(url, headers=headers)
+
+def parse_article_details(soup):
+    try:
+        header = soup.find_all('span', 'article-meta-value')
+        title = header[2].text
+        main_container = soup.find(id='main-container')
+        all_text = main_container.text.split('--')[0]
+        contents = all_text.split('\n')[2:]
+        content = '\n'.join(contents)
+        s = SnowNLP(content)
+        summary = s.summary(3)  # 提取三個關鍵句子
+        sentiment = s.sentiments  # 情感分析
+        return {'標題': title, '內容': content, '關鍵句子': summary, '情感分析': sentiment}
+    except Exception as e:
+        return {'錯誤': str(e)}
+
+def get_articles_from_page(page_number):
+    articles_data = []
+    base_url = "https://www.ptt.cc"
+    url = f"{base_url}/bbs/MakeUp/index{page_number}.html"
+    response = fetch_url(url)
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+
+    sections = soup.select('div.r-ent')
+    keys = ["[選擇]", "[心得]", "[妝容]"]
+    for section in sections:
+        num = section.find('div', class_="nrec").text
+        if num == '爆' or (num.isdigit() and int(num) >= 10):
+            title = section.select('div.title')[0].text.strip()
+            for key in keys:
+                if key in title:
+                    link = section.find('a')['href']
+                    article_soup = fetch_url(base_url + link).text
+                    article_details = parse_article_details(bs4.BeautifulSoup(article_soup, "html.parser"))
+                    article_details['類別'] = key.strip('[]')
+                    article_details['人氣'] = num
+                    article_details['日期'] = section.find("div", class_="date").text
+                    articles_data.append(article_details)
+    return articles_data
+
+start_page = 3850
+end_page = 3851
+
+all_articles = []
+for page in range(start_page, end_page + 1):
+    all_articles.extend(get_articles_from_page(page))
+
+df = pd.DataFrame(all_articles)
+df.to_excel("ptt_makeup_articles.xlsx", index=False)
