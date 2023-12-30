@@ -55,13 +55,19 @@ def get_articles_from_page(page_number):
                     articles_data.append(article_details)
     return articles_data
 
-start_page = 3850
-end_page = 3851
+#前一頁頁數
+url = 'https://www.ptt.cc/bbs/MakeUp/index.html'
+soup = BeautifulSoup(fetch_url(url).text, "html.parser")
+previous_page = soup.select('div#action-bar-container div.btn-group-paging a')[1]['href']
+previous_page_num = int(previous_page.replace('/bbs/MakeUp/index','').replace('.html',''))
+#最新頁數
+page = previous_page_num + 1 
 
 all_articles = []
-for page in range(start_page, end_page + 1):
+for i in range(2): #抓2頁
+    page -= i
     all_articles.extend(get_articles_from_page(page))
-    sleep(uniform(0.4, 1))
+    sleep(uniform(0.4,1))
 
 filenames = ["標題", "類別", "內容", "人氣", "日期", "關鍵句子", "情感分析","年份","網址"]
 
