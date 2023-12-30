@@ -1,4 +1,3 @@
-
 import requests
 from bs4 import BeautifulSoup
 from snownlp import SnowNLP
@@ -52,6 +51,7 @@ def get_articles_from_page(page_number):
                     article_details['類別'] = key.strip('[]')
                     article_details['人氣'] = num
                     article_details['日期'] = section.find("div", class_="date").text
+                    article_details['網址'] ="https://www.ptt.cc" + link
                     articles_data.append(article_details)
     return articles_data
 
@@ -63,7 +63,7 @@ for page in range(start_page, end_page + 1):
     all_articles.extend(get_articles_from_page(page))
     sleep(uniform(0.4, 1))
 
-filenames = ["標題", "類別", "內容", "人氣", "日期", "關鍵句子", "情感分析","年份"]
+filenames = ["標題", "類別", "內容", "人氣", "日期", "關鍵句子", "情感分析","年份","網址"]
 
 # 開啟 CSV 檔案，將 'a+' 改為 'w'，以確保每次都是重新寫入
 with open("demo.csv", "w", newline="", encoding='UTF-8') as file:
