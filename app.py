@@ -45,3 +45,5 @@ def getnum(num):
 
 if __name__=='__main__':#主程式
     app.run()
+    
+    #執行完後去網頁127.0.0.1/5000/result
