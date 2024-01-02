@@ -28,7 +28,7 @@ def parse_article_details(soup):  # 內文
         s = SnowNLP(content)
         summary = s.summary(3)  # 提取三個關鍵句子
         sentiment = s.sentiments  # 情感分析
-        # openai回傳產品名稱
+        # openai回傳產品名稱 #openai==0.28
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             max_tokens=128,
