@@ -1,4 +1,3 @@
-
 import requests
 from bs4 import BeautifulSoup
 from snownlp import SnowNLP
@@ -6,6 +5,8 @@ import csv
 from time import sleep
 from random import uniform
 import re
+import openai
+openai.api_key = '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'
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'}
 
@@ -27,7 +28,20 @@ def parse_article_details(soup):  # 內文
         s = SnowNLP(content)
         summary = s.summary(3)  # 提取三個關鍵句子
         sentiment = s.sentiments  # 情感分析
-        return {'標題': title, '內容': content, '關鍵句子': summary, '情感分析': sentiment,'年份':date}
+        # openai回傳產品名稱
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            max_tokens=128,
+            temperature=0,
+            messages=[
+                {"role": "user", "content": "分析文章，回傳抓取到的資料，只需回傳品牌、名稱、種類(眼影、唇彩、底妝、眉筆、眼線、睫毛膏)"},
+                {"role": "assistant", "content": "品牌:\n名稱:\n種類:"},
+                {"role": "user", "content": content}
+            ]
+        )
+        assistant_reply = response['choices'][0]['message']['content']
+
+        return {'標題': title, '內容': content, '關鍵句子': summary, '情感分析': sentiment,'年份':date,'產品名稱':assistant_reply}
     except Exception as e:
         return {'錯誤': str(e)}
 
@@ -52,6 +66,7 @@ def get_articles_from_page(page_number):
                     article_details['類別'] = key.strip('[]')
                     article_details['人氣'] = num
                     article_details['日期'] = section.find("div", class_="date").text
+                    article_details['網址'] ="https://www.ptt.cc" + link
                     articles_data.append(article_details)
     return articles_data
 
@@ -69,7 +84,7 @@ for i in range(2): #抓2頁
     all_articles.extend(get_articles_from_page(page))
     sleep(uniform(0.4,1))
 
-filenames = ["標題", "類別", "內容", "人氣", "日期", "關鍵句子", "情感分析","年份"]
+filenames = ["標題", "類別", "產品名稱" , "內容", "人氣", "日期", "關鍵句子", "情感分析","年份","網址"]
 
 # 開啟 CSV 檔案，將 'a+' 改為 'w'，以確保每次都是重新寫入
 with open("demo.csv", "w", newline="", encoding='UTF-8') as file:
