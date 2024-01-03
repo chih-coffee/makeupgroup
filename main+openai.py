@@ -28,20 +28,26 @@ def parse_article_details(soup):  # 內文
         s = SnowNLP(content)
         summary = s.summary(3)  # 提取三個關鍵句子
         sentiment = s.sentiments  # 情感分析
-        # openai回傳產品名稱 #openai==0.28
+        # openai回傳產品名稱、種類、評分
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            max_tokens=128,
+            max_tokens=256,
             temperature=0,
             messages=[
-                {"role": "user", "content": "分析文章，回傳抓取到的資料，只需回傳品牌、名稱、種類(眼影、唇彩、底妝、眉筆、眼線、睫毛膏)"},
-                {"role": "assistant", "content": "品牌:\n名稱:\n種類:"},
+                {"role": "user", "content": "分析文章，回傳抓取到的資料，只需回傳品牌、名稱、種類(眼影、唇彩、底妝、眉筆、眼線、睫毛膏)及判斷文章語句對產品的評分(1-5分)"},
+                {"role": "assistant", "content": "品牌:\n名稱:\n種類:\n評分:"},
                 {"role": "user", "content": content}
             ]
         )
         assistant_reply = response['choices'][0]['message']['content']
+        assistant_reply = assistant_reply.split('\n')
+        #將openai回覆的文字分門別類
+        brand_name = assistant_reply[0][4:]
+        product_name = assistant_reply[1][4:]
+        product_category = assistant_reply[2][4:]
+        product_score = assistant_reply[3][4:]
 
-        return {'標題': title, '內容': content, '關鍵句子': summary, '情感分析': sentiment,'年份':date,'產品名稱':assistant_reply}
+        return {'標題': title, '內容': content, '關鍵句子': summary, '情感分析': sentiment, '年份':date, '品牌':brand_name, '產品名稱':product_name, '產品種類':product_category, '評分':product_score}
     except Exception as e:
         return {'錯誤': str(e)}
 
@@ -84,7 +90,7 @@ for i in range(2): #抓2頁
     all_articles.extend(get_articles_from_page(page))
     sleep(uniform(0.4,1))
 
-filenames = ["標題", "類別", "產品名稱" , "內容", "人氣", "日期", "關鍵句子", "情感分析","年份","網址"]
+filenames = ["標題", "類別", "產品種類", "品牌", "產品名稱", "內容", "人氣", "日期", "關鍵句子", "評分", "情感分析", "年份", "網址"]
 
 # 開啟 CSV 檔案，將 'a+' 改為 'w'，以確保每次都是重新寫入
 with open("demo.csv", "w", newline="", encoding='UTF-8') as file:
