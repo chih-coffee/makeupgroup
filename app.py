@@ -7,17 +7,24 @@ app = Flask(__name__)
 def hello():
     return render_template("home.html")
 
-@app.route("/result",methods=['GET'])
+@app.route("/result",methods=['GET','POST'])
 def Result():
     if request.method=="GET":
+        return render_template("web.html",start="起動成功")
+
+    elif request.method=="POST":
         connection=sqlite3.connect("DATA.db")
         cursor = connection.cursor()
         cursor.execute('SELECT * FROM `DEMO`;')
         results=cursor.fetchall()
-        lstdata=[]
-        d=dict()
+        button1=request.values.get("口紅")
+        button2=request.values.get("底妝")
+        button3=request.values.get("彩妝")
+        alldata=[]
         for row in results:
             year,date,tp,title,famous,url,emo,keyword,content=row
+            d=dict()
+            # year,date,num,title=row
             d["年份"]=year
             d["日期"]=date
             d["類別"]=tp
@@ -26,15 +33,20 @@ def Result():
             d["網址"]=url
             d["情感分析"]=emo
             d["關鍵句子"]=keyword
-            # d["內容"]=content
-            lstdata.append(d)
-            print(d)
-        # data=jsonify(lstdata)
-        jsondata=json.dumps(lstdata,ensure_ascii=False)
-        # data=jsonify(jsondata,ensure_ascii=False)
+            d["內容"]=content
+            alldata.append(d)
+        if button1=="口紅":
+            data=[i for i in alldata if i["類別"]=="口紅"]
+            return render_template("web.html",data=data)
+        elif button2=="底妝":
+            data=[i for i in alldata if i["類別"]=="底妝"]
+            return render_template("web.html",data=data)
+        elif button3=="彩妝":
+            data=[i for i in alldata if i["類別"]=="彩妝"]
+            return render_template("web.html",data=data)
         cursor.close()  
         connection.close()
-    return jsondata
+
 @app.route("/<name>")#名字回傳
 def getname(name):
     return f"UserName is : {name}"
@@ -45,5 +57,5 @@ def getnum(num):
 
 if __name__=='__main__':#主程式
     app.run()
-    
-    #執行完後去網頁127.0.0.1/5000/result
+
+#執行完後去網頁127.0.0.1/5000/result
