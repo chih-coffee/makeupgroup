@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makeup</title>
+    <style>
+        body{
+            background-color: burlywood;
+        }
+        h1,h2{
+            width: 40%;
+            text-align: center;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 10px; 
+            border:none;
+            border-radius: 5px; 
+            cursor: pointer; 
+            width: 5%;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <h1>Makeup</h1>
+    <h2>DATA</h2>
+    <h2>{{ start }}</h2>
+    <form action="/result" method="post">
+        <input type="submit" value="底妝" name="底妝">
+        <input type="submit" value="眉筆" name="眉筆">
+        <input type="submit" value="眼影" name="眼影">
+        <input type="submit" value="眼線" name="眼線">
+        <input type="submit" value="睫毛膏" name="睫毛膏">
+        <input type="submit" value="唇彩" name="唇彩">
+        <input type="submit" value="其他" name="其他">
+    </form>
+    {% if data is defined %}
+    {% for i in data %}
+        <table border="1">
+        {% for title, content in i.items() %}
+            <tr>
+                <th>{{ title }}</th>
+                <td>{{ content }}</td> 
+            </tr>
+        {% endfor %}
+        <p></p>
+        </table>
+    {% endfor %}
+    {% endif %}
+</body>
+</html>
