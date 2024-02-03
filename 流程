@@ -1,0 +1,9 @@
+程式順序
+1.david的檔案(只先抓爬蟲下來的文章內容、日期、標題、網址、人氣)，產生一個raw.xlsx
+2.執行opemai.py擋，將抓下來的文章放進openai裡面做分析，產生一個，產生一個demo.xlsx
+3.我自己有手動整理demo.xlsx，因為openai的回答有些會不一致，命名為FINAL.xlsx
+4.執行pivot.py，將FINAL.xlsx資料做切割，解決一篇文章有多個產品的問題，產生output_brand.xlsx
+5.執行sql.py，將整理好的資料放進DB裡面，並做整理和分析
+6.將網頁的html架好，update_web.html
+7.執行update_app.py
+完成
