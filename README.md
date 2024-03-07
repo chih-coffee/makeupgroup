@@ -17,10 +17,15 @@
 具體安裝步驟取決於您感興趣的組件，因此請參閱存儲庫中的個別文件說明以獲取更多詳細訊息。
 
 1.執行 爬取2023 美妝資料.ipynb，命名為FINAL.xlsx
+
 2.執行pivot.py，將FINAL.xlsx資料做切割，解決一篇文章有多個產品的問題，產生output_brand.xlsx
+
 3.執行sql.py，將整理好的資料放進DB裡面，並做整理和分析
+
 4.將網頁的html架好，update_web.html
+
 5.執行update_app.py
+
 
 bash
 git clone https://github.com/chih-coffee/makeupgroup.git
